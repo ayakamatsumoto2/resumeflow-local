@@ -1,187 +1,49 @@
-> 在线使用：[https://resumeflow.preview.aliyun-zeabur.cn/](https://resumeflow.preview.aliyun-zeabur.cn/)
+# ResumeFLOW 本地版（resumeflow-local）
 
-# ResumeFLOW
+纯本地运行的简历工具：简历编辑、多份简历管理、经历库、AI 助手、JD 匹配分析、PDF 导出、数据备份。
+不需要登录，不需要服务器，所有数据只保存在你自己的电脑上；AI 功能使用你自己填写的 DeepSeek（或其他兼容 OpenAI 接口）的 API Key。
 
-ResumeFLOW 是一个面向求职材料管理的 AI 简历工作台。它把简历版本、经历库、JD 匹配分析、AI 助手、PDF 导出和账户管理放在同一个工作流里，适合用来沉淀个人经历资产，并针对不同岗位快速生成和优化简历。
+> 本项目基于 **CMFHF** 的开源项目 [ResumeFLOW](https://github.com/CMFHF-404/ResumeFLOW) 修改，
+> 按原项目的 **GNU AGPL-3.0-or-later** 许可发布（见 [LICENSE](LICENSE)）。
+> 原项目说明保留在 [README.upstream.md](README.upstream.md)。
+> 修改者：万象更新技术实验室。
 
-## 功能概览
-
-- 简历仪表盘：管理多份简历、切换目标岗位、维护草稿和定稿状态。
-- 简历编辑器：编辑个人信息、教育背景、工作/项目经历、技能和证书。
-- 经历库：集中维护可复用的经历素材，并支持经历摘要生成和简历上传导入。
-- AI 助手：支持简历内容补全、JD 分析、经历润色、草稿卡片应用和上下文跳转。
-- PDF 导出：前后端配合生成简历 PDF 和经历库 PDF。
-- 账户与反馈：集成 Logto 鉴权、账户管理、反馈收集和基础访问分析。
-
-## 技术栈
-
-- 前端：Vite、React、TypeScript、Lucide React
-- 后端：FastAPI、SQLModel、PostgreSQL、asyncpg、Playwright
-- 鉴权：Logto
-- AI：兼容 OpenAI 风格接口的 `AI_*` 配置，并保留 Gemini 兼容配置
-- 独立子应用：`magic-resume-inspect/` 是单独的 Next.js 工作区
-
-## 仓库结构
-
-```text
-.
-├── App.tsx                     # 前端应用入口
-├── components/                 # 通用 UI 组件
-├── hooks/                      # 前端业务 hooks
-├── services/                   # API、AI、导出、鉴权等前端服务
-├── tests/                      # 前端 Node test 定向测试
-├── views/                      # Dashboard、Editor、ExperienceBank、AI Assistant 等视图
-├── backend/                    # FastAPI 后端服务
-│   ├── app/                    # 后端应用代码
-│   ├── migrations/             # 数据库迁移脚本
-│   └── test_*.py               # 后端 unittest 测试
-└── magic-resume-inspect/       # 独立 Next.js 应用，使用 pnpm
-```
-
-## 本地开发
-
-### 1. 前端
+## 使用
 
 ```bash
 npm install
-cp .env.example .env
-npm run dev
+npm run dev      # 开发预览
+npm run build    # 生成 dist/，可直接用任意静态服务器打开
 ```
 
-浏览器中的 `VITE_API_BASE_URL` 在生产和本地都固定为同源 `/api`。Vite 开发服务器默认绑定 `0.0.0.0:5173`，并把该路径代理到仅供开发服务器使用的 `VITE_DEV_API_PROXY_TARGET`（默认 `http://localhost:8000`）；它不会写入浏览器构建产物。
+首次使用：点左上角头像 →「本地设置」→ 填写 API Key（默认 DeepSeek：`https://api.deepseek.com`，模型 `deepseek-chat`，深度思考 `deepseek-reasoner`）→「保存并测试连接」。
 
-本地 Logto 登出回跳需要在 Logto 控制台加入：
+## 与原版的区别（修改声明）
 
-```text
-http://localhost:5173
-```
+依据 AGPL-3.0 第 5 条，以下列出本版本相对原项目（基于上游提交 `8e2e8f6`）的修改，详细记录见 [CHANGELOG.local.md](CHANGELOG.local.md)：
 
-并按需设置：
+| 方面 | 原版 | 本地版 |
+|---|---|---|
+| 登录 | Logto 账号登录 | 无需登录，本机单用户（`local/logtoShim.tsx`） |
+| 数据存储 | 后端 PostgreSQL | 浏览器 / WebView 的 IndexedDB（`local/store.ts`） |
+| 后端 | Python FastAPI | 无。前端的 `/api` 请求由 `local/install.ts` 在本机拦截处理，逻辑移植自原 `backend/app` |
+| AI | 服务端调用模型，按额度计费 | 前端直连用户自己配置的模型服务（`local/ai/llm.ts`）；提示词由 `tools/generate-local-prompts.py` 从原后端自动导出 |
+| 简历导入 | 服务端解析 PDF / Word / 图片 | 本机提取 PDF / Word / 文本的文字后交给模型；暂不支持图片 |
+| PDF 导出 | 服务端 Playwright + Chromium | 系统打印对话框「另存为 PDF」（`local/printExport.ts`） |
+| 支付 / 额度 / 反馈 / 统计 / Agent API | 有 | 移除 |
+| 数据备份 | — | 新增 JSON 备份导出 / 导入（本地设置） |
+| 界面 | 原配色 | 换成万象之匣配色与字体（`local/bansho-theme.css`）；简历预览与 PDF 保持原样 |
 
-```text
-VITE_LOGTO_ACCOUNT_CENTER_URL
-```
+暂未移植：「六维深度评估」（原版依赖服务端多轮校验流程）。
 
-### 2. 后端
+`backend/` 目录保留原版后端代码，仅作为提示词来源与参考，本地版运行时不使用。
 
-```bash
-cd backend
-pip install -r requirements.txt
-cp .env.example .env
-python init_local_db.py
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
+## 隐私
 
-也可以用：
+除了你主动触发的 AI 功能会把相关内容发送到你填写的模型服务之外，本程序不向任何服务器发送数据。
 
-```bash
-sh prestart.sh
-```
+## 许可
 
-`prestart.sh` 会先运行 `python app/init_db.py`，再启动 Uvicorn。
-
-### 3. 管理员初始化
-
-```bash
-cd backend
-python set_first_admin.py <logto-user-id>
-```
-
-或先设置 `FIRST_ADMIN_USER_ID`，再运行：
-
-```bash
-python set_first_admin.py
-```
-
-### 4. magic-resume-inspect
-
-`magic-resume-inspect/` 是独立 Next.js 工作区，不要和根项目混用包管理器。
-
-```bash
-cd magic-resume-inspect
-pnpm install
-pnpm dev
-```
-
-## 环境变量
-
-前端变量参考 `.env.example`，后端变量参考 `backend/.env.example`。常用配置包括：
-
-- `VITE_API_BASE_URL`：浏览器同源 API 挂载，生产固定为 `/api`
-- `VITE_DEV_API_PROXY_TARGET`：仅本地 Vite 开发服务器使用的后端 upstream，默认 `http://localhost:8000`
-- `VITE_LOGTO_*`：Logto 前端鉴权配置
-- `VITE_LOGTO_ACCOUNT_CENTER_URL`：Logto 托管账号中心地址
-- `DATABASE_URL`：PostgreSQL 连接字符串
-- `LOGTO_ISSUER` / `LOGTO_APP_ID`：后端 ID token 鉴权校验配置；`LOGTO_APP_ID` 与 `FRONTEND_LOGTO_APP_ID` 必须是无首尾空白的非空 `[A-Za-z0-9_-]+`，且不需要自定义 Logto API Resource。
-- `RESUMEFLOW_DEPLOYMENT_MODE`：后端部署模式，默认 `local`；`backend/Dockerfile` 写入不可由普通运行环境变量降级的 production 镜像标记。生产模式启动时要求 `FRONTEND_ORIGIN`、`CORS_ALLOW_ORIGINS` 和全部 `FRONTEND_LOGTO_*`。
-- `FRONTEND_LOGTO_ENDPOINT` / `FRONTEND_LOGTO_APP_ID` / `FRONTEND_LOGTO_REDIRECT_URI`：后端启动时校验的前端公开 Logto 镜像配置；生产模式必须分别与 `VITE_LOGTO_ENDPOINT`、`VITE_LOGTO_APP_ID`、`VITE_LOGTO_REDIRECT_URI` 完全一致。`FRONTEND_LOGTO_REDIRECT_URI` 必须是 `FRONTEND_ORIGIN/callback`，且 `CORS_ALLOW_ORIGINS` 必须包含 `FRONTEND_ORIGIN`。
-- `AI_ROUTE_PROFILE`：后端 AI 路线，默认 `gemini_primary`。该路线把生成、解析、查重与 thinking 全部固定到 `GEMINI_*`；遗留的 `AI_FAST_MODEL`、`AI_DEDUPE_MODEL` 不会覆盖 `GEMINI_MODEL`。可显式切换为 `openai_primary`、`qwen_primary` 或 `hybrid_gemini_aifast`。
-- `GEMINI_API_KEY` / `GEMINI_BASE_URL` / `GEMINI_MODEL`：`gemini_primary` 的唯一供应商配置；生产环境使用默认 `gemini_primary` 启动时必须提供非空 `GEMINI_API_KEY`，仅有旧 `AI_API_KEY` 会在 Settings 初始化阶段失败。Gemini 3.x thinking 请求使用 `thinkingLevel` 语义。
-- `AI_API_KEY` / `AI_BASE_URL` / `AI_MODEL`：OpenAI-compatible 主配置。`openai_primary`、`qwen_primary` 与 `hybrid_gemini_aifast` 必须显式提供非 Gemini 的 `AI_MODEL`；`openai_primary` 还要求显式的非 DashScope `AI_BASE_URL`。
-- `AI_FAST_API_KEY` / `AI_FAST_BASE_URL` / `AI_FAST_MODEL`：非 Gemini 路线的普通简历解析 lane。`AI_FAST_API_KEY` 与 `AI_FAST_BASE_URL` 必须同时配置；两者同时省略时才会复用 `AI_API_KEY` / `AI_BASE_URL`。`AI_FAST_MODEL` 仅在非 Gemini 路线生效。
-- `AI_DEDUPE_ENABLED` / `AI_DEDUPE_MODEL` / `AI_DEDUPE_MAX_CANDIDATES`：可选经历灰区语义查重配置；`AI_DEDUPE_MODEL` 仅在非 Gemini 路线生效。
-- `AI_RESPONSES_BASE_URL`：`qwen_primary` 和 `openai_primary` 的 Responses thinking stream 地址。当前没有独立的 Responses key，因此必须与 `AI_BASE_URL` 使用相同协议、主机和端口；可使用同源 relay 的不同路径，不能配置异源 endpoint。DashScope 路线应同时把两项设为对应的兼容模式地址。
-- `EXPORT_TOKEN_SECRET`：导出快照令牌密钥
-- `POSTHOG_*`、`FEISHU_*`：分析和反馈通知相关配置
-
-不要提交真实 `.env`、密钥、数据库连接串或用户数据。
-
-## 验证
-
-前端构建：
-
-```bash
-npm run build
-```
-
-前端定向测试示例：
-
-```bash
-node --test tests/account-management-static.test.mjs
-node --test tests/experienceBankDrafts.test.mjs tests/experienceSimpleModeParser.test.mjs
-```
-
-后端环境和连接检查：
-
-```bash
-cd backend
-python verify_env.py
-python verify_db.py
-python verify_ai.py
-python verify_timeout.py
-```
-
-后端定向测试示例：
-
-```bash
-cd backend
-python -m unittest test_assistant_features
-python -m unittest test_parser_service
-python -m unittest test_auth_middleware_id_token
-python -m unittest test_agent_api
-python -m unittest test_ai_service
-python -m unittest test_account_verification_cooldown
-python -m unittest test_experience_drafts
-```
-
-## 部署提示
-
-- 根目录 `Dockerfile` 构建前端静态产物，并用 Nginx 提供服务。
-- `backend/Dockerfile` 构建 FastAPI 服务，并安装 Playwright Chromium 以支持导出能力；容器在数据库初始化前校验公开前端 Logto 镜像配置，镜像健康检查使用 `http://127.0.0.1:8000/ready`，只有 JWKS 就绪才健康。
-- 在 Zeabur 服务控制台将后端健康检查路径配置为 `/ready`，不要使用仅表示进程存活的 `/health`。此仓库不能代替控制台完成该项配置。
-- 后端启动后独立维护 Logto 公钥缓存：默认提前 60 秒刷新，失败后按冷却时间自动重试，无访问流量时也会恢复。`/ready` 只检查数据库和公钥可用状态，不等待远端公钥拉取；`/health` 仍仅表示进程存活。已有公钥的过期容错期限不变，长期无法连接 Logto 时仍会拒绝认证。
-- 生产部署需要分别配置前端构建参数、后端环境变量、PostgreSQL、Logto 回调地址、Account Center 地址和 CORS 允许来源。
-- `backend/migrate_postgres_best_effort.py` 是手动高影响数据库迁移工具，只有在明确设置 `SOURCE_DATABASE_URL` 和 `TARGET_DATABASE_URL` 后才应运行。
-
-## 开发约定
-
-- 根项目使用 npm 和 `package-lock.json`。
-- `magic-resume-inspect/` 使用 pnpm 和 `pnpm-lock.yaml`。
-- 不要手改生成产物或缓存，例如 `dist/`、`backend/__pycache__/`、`backend/.assistant_attachment_cache/`、`vite-dev.log`、`git-status.txt`、`git-diff.txt`。
-- 目前仓库没有统一启动根前端和 `backend/` 的命令，开发时需要分别启动。
-
-## 许可证
-
-本项目采用 GNU Affero General Public License v3.0 or later（`AGPL-3.0-or-later`）。
-
-AGPL 是强 copyleft 许可证。分发本项目或基于本项目的修改版本时，需要按 AGPL 条款开放相应源代码；如果修改版本通过网络服务提供给用户使用，也需要向这些用户提供对应源代码。完整条款见 [LICENSE](LICENSE)。
+GNU Affero General Public License v3.0 or later。
+原作品版权归 CMFHF 所有；本地版的修改部分同样以 AGPL-3.0-or-later 发布。
+如果你分发本程序（包括随其他软件一起分发），须同时提供对应的完整源代码。
