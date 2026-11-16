@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { LogtoProvider, LogtoConfig, UserScope } from '@logto/react';
 import './styles/tailwind.css';
+import { installLocalBackend } from './local/install';
 import App from './App';
 import ExperienceBankPdfExportPage from './views/ExperienceBankPdfExportPage';
 import ResumePdfExportPage from './views/ResumePdfExportPage';
@@ -12,6 +13,9 @@ const config: LogtoConfig = {
   appId: import.meta.env.VITE_LOGTO_APP_ID,
   scopes: [UserScope.Profile, UserScope.Email, UserScope.Phone, UserScope.Identities],
 };
+
+// Local Edition：在任何请求发出之前接管 /api，全部交给浏览器内的本地数据层处理。
+installLocalBackend();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

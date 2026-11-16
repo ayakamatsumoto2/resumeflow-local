@@ -24,6 +24,8 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        // Local Edition：用本地单用户替身取代 Logto 登录 SDK。
+        '@logto/react': path.resolve(__dirname, 'local/logtoShim.tsx'),
       },
     },
     build: {

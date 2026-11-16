@@ -183,10 +183,8 @@ export const resolveAuthUserKeyFromActiveSession = async (): Promise<string | nu
 
 export const getApiBaseUrl = (): string => {
     const envBaseUrl = import.meta.env.VITE_API_BASE_URL;
-    if (import.meta.env.DEV) {
-        return '/api';
-    }
-    return envBaseUrl || '';
+    // Local Edition：/api 始终由 local/install.ts 在浏览器内拦截处理，不存在真实后端。
+    return envBaseUrl || '/api';
 };
 
 const isWriteMethod = (method?: string) => {
@@ -209,6 +207,8 @@ export const getAuthorizationHeader = async (
 
 const apiClient = axios.create({
     baseURL: getApiBaseUrl(),
+    // Local Edition：统一走 fetch，才能被本地数据层拦截（XHR 无法拦截）。
+    adapter: 'fetch',
     headers: {
         'Content-Type': 'application/json',
     },
