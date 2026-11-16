@@ -1,0 +1,180 @@
+/*
+ * ResumeFLOW Local Edition — 万象之匣风格主题（只换配色与字体，不改布局）。
+ * 原理：tailwind.config.cjs 把 gray / slate / emerald / teal / green 色阶改为读取下面的 CSS 变量。
+ * - 亮色界面：米白纸面 + 墨绿主色（与万象之匣 web/assets/base.css 一致）
+ * - 深色模式、简历预览与 PDF 打印：恢复 Tailwind 原色，保证简历成品不受影响
+ */
+:root {
+  --rf-gray-50: 251 250 246;
+  --rf-gray-100: 246 244 238;
+  --rf-gray-200: 231 227 217;
+  --rf-gray-300: 216 211 198;
+  --rf-gray-400: 179 174 159;
+  --rf-gray-500: 139 144 137;
+  --rf-gray-600: 107 115 108;
+  --rf-gray-700: 74 85 79;
+  --rf-gray-800: 51 64 58;
+  --rf-gray-900: 34 48 42;
+  --rf-gray-950: 21 29 25;
+  --rf-slate-50: 251 250 246;
+  --rf-slate-100: 246 244 238;
+  --rf-slate-200: 231 227 217;
+  --rf-slate-300: 216 211 198;
+  --rf-slate-400: 179 174 159;
+  --rf-slate-500: 139 144 137;
+  --rf-slate-600: 107 115 108;
+  --rf-slate-700: 74 85 79;
+  --rf-slate-800: 51 64 58;
+  --rf-slate-900: 34 48 42;
+  --rf-slate-950: 21 29 25;
+  --rf-emerald-50: 240 245 241;
+  --rf-emerald-100: 229 238 231;
+  --rf-emerald-200: 207 226 214;
+  --rf-emerald-300: 169 201 182;
+  --rf-emerald-400: 122 168 146;
+  --rf-emerald-500: 79 138 114;
+  --rf-emerald-600: 63 122 99;
+  --rf-emerald-700: 47 92 75;
+  --rf-emerald-800: 38 76 62;
+  --rf-emerald-900: 30 61 50;
+  --rf-emerald-950: 18 38 31;
+  --rf-teal-50: 240 245 241;
+  --rf-teal-100: 229 238 231;
+  --rf-teal-200: 207 226 214;
+  --rf-teal-300: 169 201 182;
+  --rf-teal-400: 122 168 146;
+  --rf-teal-500: 79 138 114;
+  --rf-teal-600: 63 122 99;
+  --rf-teal-700: 47 92 75;
+  --rf-teal-800: 38 76 62;
+  --rf-teal-900: 30 61 50;
+  --rf-teal-950: 18 38 31;
+  --rf-green-50: 240 245 241;
+  --rf-green-100: 229 238 231;
+  --rf-green-200: 207 226 214;
+  --rf-green-300: 169 201 182;
+  --rf-green-400: 122 168 146;
+  --rf-green-500: 79 138 114;
+  --rf-green-600: 63 122 99;
+  --rf-green-700: 47 92 75;
+  --rf-green-800: 38 76 62;
+  --rf-green-900: 30 61 50;
+  --rf-green-950: 18 38 31;
+}
+
+.dark, .a4-preview, [data-rf-export-root], [data-rf-export-root] * {
+  --rf-gray-50: 249 250 251;
+  --rf-gray-100: 243 244 246;
+  --rf-gray-200: 229 231 235;
+  --rf-gray-300: 209 213 219;
+  --rf-gray-400: 156 163 175;
+  --rf-gray-500: 107 114 128;
+  --rf-gray-600: 75 85 99;
+  --rf-gray-700: 55 65 81;
+  --rf-gray-800: 31 41 55;
+  --rf-gray-900: 17 24 39;
+  --rf-gray-950: 3 7 18;
+  --rf-slate-50: 248 250 252;
+  --rf-slate-100: 241 245 249;
+  --rf-slate-200: 226 232 240;
+  --rf-slate-300: 203 213 225;
+  --rf-slate-400: 148 163 184;
+  --rf-slate-500: 100 116 139;
+  --rf-slate-600: 71 85 105;
+  --rf-slate-700: 51 65 85;
+  --rf-slate-800: 30 41 59;
+  --rf-slate-900: 15 23 42;
+  --rf-slate-950: 2 6 23;
+  --rf-emerald-50: 236 253 245;
+  --rf-emerald-100: 209 250 229;
+  --rf-emerald-200: 167 243 208;
+  --rf-emerald-300: 110 231 183;
+  --rf-emerald-400: 52 211 153;
+  --rf-emerald-500: 16 185 129;
+  --rf-emerald-600: 5 150 105;
+  --rf-emerald-700: 4 120 87;
+  --rf-emerald-800: 6 95 70;
+  --rf-emerald-900: 6 78 59;
+  --rf-emerald-950: 2 44 34;
+  --rf-teal-50: 240 253 250;
+  --rf-teal-100: 204 251 241;
+  --rf-teal-200: 153 246 228;
+  --rf-teal-300: 94 234 212;
+  --rf-teal-400: 45 212 191;
+  --rf-teal-500: 20 184 166;
+  --rf-teal-600: 13 148 136;
+  --rf-teal-700: 15 118 110;
+  --rf-teal-800: 17 94 89;
+  --rf-teal-900: 19 78 74;
+  --rf-teal-950: 4 47 46;
+  --rf-green-50: 240 253 244;
+  --rf-green-100: 220 252 231;
+  --rf-green-200: 187 247 208;
+  --rf-green-300: 134 239 172;
+  --rf-green-400: 74 222 128;
+  --rf-green-500: 34 197 94;
+  --rf-green-600: 22 163 74;
+  --rf-green-700: 21 128 61;
+  --rf-green-800: 22 101 52;
+  --rf-green-900: 20 83 45;
+  --rf-green-950: 5 46 22;
+}
+
+:root {
+  --rf-paper: #fbfaf6;
+  --rf-bg: #f6f4ee;
+  --rf-card: #fffefb;
+  --rf-line: #e7e3d9;
+  --rf-ink: #22302a;
+  --rf-green: #2f5c4b;
+  --rf-green-2: #3f7a63;
+  --rf-serif: "Noto Serif SC", "Source Han Serif SC", "Source Han Serif CN", "思源宋体", "Songti SC", "STSong", "SimSun", serif;
+  --rf-sans: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", "微软雅黑", system-ui, sans-serif;
+  --rf-mono: "JetBrains Mono", "Cascadia Mono", "Consolas", "SFMono-Regular", monospace;
+}
+
+/* 纸面 + 点阵底纹 */
+html:not(.dark) body {
+  font-family: var(--rf-sans);
+  color: var(--rf-ink);
+  background-color: var(--rf-bg) !important;
+  background-image: radial-gradient(rgba(120, 115, 100, .16) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 白色卡片改为暖白纸色（简历纸面除外） */
+html:not(.dark) .bg-white:not(.a4-preview):not(.a4-preview *):not([data-rf-export-root]):not([data-rf-export-root] *) {
+  background-color: var(--rf-card);
+}
+
+/* 页面级标题用宋体，和万象之匣一致（简历内容不受影响） */
+html:not(.dark) :is(h1, h2):not(.a4-preview *):not([data-rf-export-root] *),
+html:not(.dark) .rf-serif-title {
+  font-family: var(--rf-serif);
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+
+/* AI 按钮：墨绿渐变 */
+html:not(.dark) .ai-active-gradient {
+  background: linear-gradient(135deg, #3f7a63 0%, #2f5c4b 60%, #264c3e 100%) !important;
+}
+
+/* 滚动条 */
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #d6d1c4;
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #bdb7a7;
+  background-clip: padding-box;
+  border: 3px solid transparent;
+}
+
+/* 选中文字 */
+html:not(.dark) ::selection {
+  background: #cfe2d6;
+}

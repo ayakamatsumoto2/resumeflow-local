@@ -45,8 +45,8 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
   const isUnlimitedQuota = Boolean(quotaSummary?.is_unlimited);
   const quotaPercent = isUnlimitedQuota ? 100 : Math.max(0, Math.min(quotaSummary?.remaining_percent ?? 0, 100));
   const quotaDash = Math.round((quotaPercent / 100) * TOKEN_RING_CIRCUMFERENCE);
-  const quotaRingClass = isUnlimitedQuota ? 'text-amber-300' : 'text-emerald-400';
-  const quotaTooltipTextClass = isUnlimitedQuota ? 'text-amber-200' : 'text-emerald-200';
+  const quotaRingClass = 'text-emerald-600';
+  const quotaTooltipTextClass = 'text-emerald-200';
   // Local Edition：本地版没有额度概念，头像入口改为「本地设置」。
   const quotaTitle = '本地设置';
 
@@ -54,22 +54,22 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
     const baseClass = "flex min-w-0 items-center justify-center gap-2 rounded-xl px-3 py-2 transition-all relative group md:p-3";
     if (currentView === view) {
       if (view === ViewState.AI_ASSISTANT) {
-        return `${baseClass} ai-active-gradient text-white shadow-lg shadow-emerald-500/30`;
+        return `${baseClass} ai-active-gradient text-white shadow-md shadow-emerald-900/15`;
       }
-      return `${baseClass} bg-primary text-white shadow-lg shadow-primary/30`;
+      return `${baseClass} bg-primary text-white shadow-md shadow-primary/20`;
     }
-    return `${baseClass} text-slate-300 hover:text-white hover:bg-slate-800`;
+    return `${baseClass} text-slate-500 hover:text-emerald-700 hover:bg-emerald-50`;
   };
 
   const mobileTabButtonClass = (view: ViewState) => {
     const baseClass = "flex h-11 items-center justify-center rounded-2xl transition-all duration-300 ease-in-out overflow-hidden";
     if (currentView === view) {
       if (view === ViewState.AI_ASSISTANT) {
-        return `${baseClass} ai-active-gradient text-white shadow-lg shadow-emerald-500/20 flex-1 px-3 gap-2`;
+        return `${baseClass} ai-active-gradient text-white shadow-md shadow-emerald-900/15 flex-1 px-3 gap-2`;
       }
-      return `${baseClass} bg-primary text-white shadow-lg shadow-primary/30 flex-1 px-3 gap-2`;
+      return `${baseClass} bg-primary text-white shadow-md shadow-primary/20 flex-1 px-3 gap-2`;
     }
-    return `${baseClass} bg-slate-950/40 text-slate-300 hover:bg-slate-800 hover:text-white w-12 px-0 gap-0`;
+    return `${baseClass} bg-slate-100 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 w-12 px-0 gap-0`;
   };
 
   const mobileTabs = [
@@ -162,19 +162,19 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
 
   const renderAvatarMenu = (placement: 'mobile' | 'desktop') => (
     <div
-      className={`absolute z-[60] min-w-[208px] overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900/95 p-2 shadow-2xl shadow-slate-950/40 backdrop-blur ${
+      className={`absolute z-[60] min-w-[208px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/95 p-2 shadow-xl shadow-slate-900/10 backdrop-blur ${
         placement === 'mobile' ? 'left-0 top-full mt-3' : 'left-full top-0 ml-3'
       }`}
       role="menu"
       aria-label="头像工具栏"
     >
-      <div className="border-b border-slate-800 px-3 pb-2 pt-1">
-        <div className="text-sm font-semibold text-white">{displayName}</div>
-        <div className="text-xs text-slate-400">本地版 · 数据只保存在本机</div>
+      <div className="border-b border-slate-200 px-3 pb-2 pt-1">
+        <div className="font-serif text-base text-slate-900">{displayName}</div>
+        <div className="text-xs text-slate-500">本地版 · 数据只保存在本机</div>
       </div>
       <div className="mt-2 flex flex-col gap-1">
         <button
-          className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-white"
+          className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
           onClick={() => handleOpenTokenQuota(
             placement === 'mobile' ? mobileAvatarButtonRef.current : desktopAvatarButtonRef.current
           )}
@@ -189,13 +189,13 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
   );
 
   return (
-    <nav aria-label="主导航" className="w-full shrink-0 border-b border-slate-800 bg-slate-900 z-50 md:flex md:h-full md:w-[72px] md:flex-col md:items-center md:border-b-0 md:border-r">
+    <nav aria-label="主导航" className="w-full shrink-0 border-b border-slate-200 bg-slate-50/90 backdrop-blur z-50 md:flex md:h-full md:w-[72px] md:flex-col md:items-center md:border-b-0 md:border-r">
       <div className="px-3 py-3 md:hidden">
         <div className="flex items-center gap-3">
           <div ref={mobileAvatarMenuRef} className="relative shrink-0">
             <button
               ref={mobileAvatarButtonRef}
-              className="group relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-base font-bold text-white shadow-lg ring-2 ring-slate-800 transition-all hover:ring-slate-700"
+              className="group relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-emerald-800 text-base font-bold text-white shadow-lg ring-2 ring-slate-50 transition-all hover:ring-emerald-100"
               onClick={handleAvatarClick}
               type="button"
               data-token-quota-focus-return
@@ -205,7 +205,7 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
               title={quotaTitle}
             >
               <svg className="pointer-events-none absolute -inset-1 h-14 w-14 -rotate-90" viewBox="0 0 48 48" aria-hidden="true">
-                <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-700" />
+                <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-200" />
                 <circle
                 cx="24"
                 cy="24"
@@ -257,7 +257,7 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
         <div ref={desktopAvatarMenuRef} className="relative">
           <button
             ref={desktopAvatarButtonRef}
-            className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-lg ring-2 ring-slate-800 transition-all hover:ring-slate-700"
+            className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-emerald-800 text-white font-bold shadow-lg ring-2 ring-slate-50 transition-all hover:ring-emerald-100"
             aria-label="当前用户头像"
             aria-expanded={isAvatarMenuOpen}
             aria-haspopup="menu"
@@ -267,7 +267,7 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
             type="button"
           >
             <svg className="pointer-events-none absolute -inset-1 h-12 w-12 -rotate-90" viewBox="0 0 48 48" aria-hidden="true">
-              <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-700" />
+              <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-200" />
               <circle
                 cx="24"
                 cy="24"

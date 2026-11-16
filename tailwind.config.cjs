@@ -18,6 +18,12 @@ const dynamicThemeColorClasses = dynamicThemeColors.flatMap((color) => [
   `dark:text-${color}-400`,
 ]);
 
+// Local Edition：配色改为读取 local/bansho-theme.css 里的 CSS 变量（万象之匣风格）。
+const themedScale = (name) => Object.fromEntries(
+  ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950']
+    .map((step) => [step, `rgb(var(--rf-${name}-${step}) / <alpha-value>)`]),
+);
+
 module.exports = {
   content: [
     './index.html',
@@ -30,9 +36,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#0F766E',
-        'primary-dark': '#115E59',
-        'background-light': '#F9FAFB',
+        gray: themedScale('gray'),
+        slate: themedScale('slate'),
+        emerald: themedScale('emerald'),
+        teal: themedScale('teal'),
+        green: themedScale('green'),
+        primary: '#2F5C4B',
+        'primary-dark': '#264C3E',
+        'background-light': '#F6F4EE',
         'background-dark': '#111827',
         'surface-light': '#FFFFFF',
         'surface-dark': '#1F2937',
@@ -42,6 +53,7 @@ module.exports = {
       fontFamily: {
         display: ['Noto Sans SC', 'Inter', 'sans-serif'],
         body: ['Noto Sans SC', 'Inter', 'sans-serif'],
+        serif: ['Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', 'serif'],
       },
     },
   },
