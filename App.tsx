@@ -65,7 +65,8 @@ const ResumeEditor = lazy(() => import('./views/ResumeEditor'));
 const AIAssistant = lazy(() => import('./views/AIAssistant'));
 const FeedbackModal = lazy(() => import('./components/FeedbackModal'));
 const AgentApiPluginConfigModal = lazy(() => import('./components/AgentApiPluginConfigModal'));
-const TokenQuotaModal = lazy(() => import('./components/TokenQuotaModal'));
+// Local Edition：原「额度 / 充值」窗口替换为本地设置（AI 接口、数据备份）。
+const TokenQuotaModal = lazy(() => import('./local/LocalSettingsModal'));
 
 type ExperienceFocusRequest = {
   requestId: number;

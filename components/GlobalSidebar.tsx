@@ -47,11 +47,8 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
   const quotaDash = Math.round((quotaPercent / 100) * TOKEN_RING_CIRCUMFERENCE);
   const quotaRingClass = isUnlimitedQuota ? 'text-amber-300' : 'text-emerald-400';
   const quotaTooltipTextClass = isUnlimitedQuota ? 'text-amber-200' : 'text-emerald-200';
-  const quotaTitle = quotaSummary
-    ? isUnlimitedQuota
-      ? `无限额度，到期 ${formatDateTime(quotaSummary.unlimited_expires_at)}`
-      : `剩余 ${formatTokenAmount(quotaSummary.remaining_tokens)} / ${formatTokenAmount(quotaSummary.token_limit)}，当前用量 ${formatTokenAmount(quotaSummary.used_tokens)}`
-    : '剩余额度未加载';
+  // Local Edition：本地版没有额度概念，头像入口改为「本地设置」。
+  const quotaTitle = '本地设置';
 
   const getButtonClass = (view: ViewState) => {
     const baseClass = "flex min-w-0 items-center justify-center gap-2 rounded-xl px-3 py-2 transition-all relative group md:p-3";
@@ -173,30 +170,9 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
     >
       <div className="border-b border-slate-800 px-3 pb-2 pt-1">
         <div className="text-sm font-semibold text-white">{displayName}</div>
-        <div className="text-xs text-slate-400">{isAuthenticated ? '账户工具' : '快速入口'}</div>
+        <div className="text-xs text-slate-400">本地版 · 数据只保存在本机</div>
       </div>
       <div className="mt-2 flex flex-col gap-1">
-
-        <button
-          className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-semibold text-amber-300 transition hover:bg-amber-500/10 hover:text-amber-200"
-          onClick={() => handleOpenTokenPurchase(
-            placement === 'mobile' ? mobileAvatarButtonRef.current : desktopAvatarButtonRef.current
-          )}
-          type="button"
-          role="menuitem"
-        >
-          <CreditCard className="h-4 w-4" />
-          <span>购买套餐</span>
-        </button>
-        <button
-          className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-white"
-          onClick={handleOpenFeedback}
-          type="button"
-          role="menuitem"
-        >
-          <MessageSquare className="h-4 w-4" />
-          <span>反馈</span>
-        </button>
         <button
           className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-white"
           onClick={() => handleOpenTokenQuota(
@@ -206,49 +182,8 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
           role="menuitem"
         >
           <Gauge className="h-4 w-4" />
-          <span>额度</span>
+          <span>本地设置（AI 接口 / 数据备份）</span>
         </button>
-        <button
-          className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-white"
-          onClick={handleOpenAgentPluginConfig}
-          type="button"
-          role="menuitem"
-        >
-          <Bot className="h-4 w-4" />
-          <span>Agent API 插件配置</span>
-        </button>
-        {isAuthenticated && accountCenterUrl ? (
-          <button
-            className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-white"
-            onClick={handleOpenAccountManagement}
-            type="button"
-            role="menuitem"
-          >
-            <UserCog className="h-4 w-4" />
-            <span>账号管理</span>
-          </button>
-        ) : null}
-        {isAuthenticated ? (
-          <button
-            className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
-            onClick={handleSignOut} aria-label="登出"
-            type="button"
-            role="menuitem"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>登出</span>
-          </button>
-        ) : (
-          <button
-            className="flex items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-emerald-400 transition hover:bg-emerald-500/10 hover:text-emerald-300"
-            onClick={handleSignIn} aria-label="登录"
-            type="button"
-            role="menuitem"
-          >
-            <LogIn className="h-4 w-4 -scale-x-100" />
-            <span>登录</span>
-          </button>
-        )}
       </div>
     </div>
   );
@@ -411,25 +346,6 @@ const GlobalSidebar: React.FC<GlobalSidebarProps> = ({
         <div className="mt-auto flex w-full flex-col items-center gap-4 pb-2">
 
 
-          {isAuthenticated ? (
-            <button
-              className="group relative flex min-w-0 items-center justify-center rounded-xl px-3 py-2 transition-all md:p-3 text-red-500 hover:bg-red-500/10 hover:text-red-400"
-              onClick={handleSignOut} aria-label="登出"
-              type="button"
-            >
-              <LogOut className="h-5 w-5" />
-              <div className="nav-tooltip hidden md:block">登出</div>
-            </button>
-          ) : (
-            <button
-              className="group relative flex min-w-0 items-center justify-center rounded-xl px-3 py-2 transition-all md:p-3 text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400"
-              onClick={handleSignIn} aria-label="登录"
-              type="button"
-            >
-              <LogIn className="h-5 w-5 -scale-x-100" />
-              <div className="nav-tooltip hidden md:block">登录</div>
-            </button>
-          )}
         </div>
       </div>
     </nav>

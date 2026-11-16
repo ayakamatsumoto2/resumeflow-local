@@ -195,7 +195,7 @@ export const useResumePdfExport = ({
                 return;
             }
             updateToast(toastId, {
-                message: 'PDF 已生成，开始下载。',
+                message: '已打开打印窗口，请在对话框里选择「另存为 PDF」。',
                 type: 'success',
                 duration: 3000,
             });

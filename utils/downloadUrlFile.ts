@@ -4,6 +4,7 @@ import {
   getAuthCacheKey,
   getAuthorizationHeader,
 } from '../services/apiClient';
+import { isLocalPrintUrl, printLocalExport } from '../local/printExport';
 
 const FALLBACK_DOWNLOAD_ERROR_MESSAGE = 'PDF 下载失败，请稍后重试。';
 const AUTH_CONTEXT_CHANGED_MESSAGE = 'Authentication context changed during export';
@@ -140,6 +141,11 @@ export const downloadUrlFile = async (
   expectedAuthCacheKey?: string,
 ): Promise<void> => {
   await assertDownloadAuthContext(expectedAuthCacheKey);
+  // Local Edition：本地打印页走系统打印对话框（另存为 PDF），不向服务器下载文件。
+  if (isLocalPrintUrl(url)) {
+    await printLocalExport(url, fallbackFileName);
+    return;
+  }
   const isLegacySignedDownload = hasSingleLegacyDownloadToken(url);
   const headers = new Headers();
   if (!isLegacySignedDownload) {

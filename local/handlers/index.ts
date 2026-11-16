@@ -4,3 +4,7 @@ import './experiences';
 import './resumes';
 import './skillsCerts';
 import './misc';
+import './ai';
+import './parser';
+import './assistant';
+import './exports';
