@@ -29,6 +29,7 @@
   "exclude": [
     "dist",
     "node_modules",
-    "magic-resume-inspect"
+    "magic-resume-inspect",
+    "desktop"
   ]
 }
