@@ -62,6 +62,23 @@ jobs:
           name: sunmao-resume-windows
           path: out/*
           if-no-files-found: error
+      # 把最新的 exe 放到本仓库的 bin 分支（只保留最新一份），方便「万象之匣」打包时带上它。
+      - name: 更新 bin 分支
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          $sha = '${{ github.sha }}'
+          New-Item -ItemType Directory -Force bin-out | Out-Null
+          Copy-Item out/* bin-out/
+          Set-Content -Encoding utf8 bin-out/BUILD.txt "commit $sha`nbuilt $(Get-Date -Format o)"
+          Set-Content -Encoding utf8 bin-out/README.md "这个分支只放自动打包出的 sunmao-resume.exe（榫卯简历 Windows 版），源码见 main 分支。按 AGPL-3.0-or-later 发布。"
+          cd bin-out
+          git init -q -b bin
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -q -m "sunmao-resume.exe @ $sha"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" bin:bin
       - name: 发布到 Releases
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
