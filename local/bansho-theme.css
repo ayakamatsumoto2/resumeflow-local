@@ -1,6 +1,6 @@
 /*
  * ResumeFLOW Local Edition — 万象之匣风格主题（只换配色与字体，不改布局）。
- * 原理：tailwind.config.cjs 把 gray / slate / emerald / teal / green 色阶改为读取下面的 CSS 变量。
+ * 原理：tailwind.config.cjs 把 gray / slate / emerald / teal / green / blue / sky / indigo / violet / purple 色阶改为读取下面的 CSS 变量。
  * - 亮色界面：米白纸面 + 墨绿主色（与万象之匣 web/assets/base.css 一致）
  * - 深色模式、简历预览与 PDF 打印：恢复 Tailwind 原色，保证简历成品不受影响
  */
@@ -118,6 +118,123 @@
   --rf-green-800: 22 101 52;
   --rf-green-900: 20 83 45;
   --rf-green-950: 5 46 22;
+}
+
+:root {
+  /* 蓝 / 天蓝 → 万象之匣的雾蓝（#3d5f80）；靛 / 紫 / 紫罗兰 → 藕紫（#6a4f86） */
+  --rf-blue-50: 236 238 237;
+  --rf-blue-100: 221 225 227;
+  --rf-blue-200: 190 200 208;
+  --rf-blue-300: 156 172 187;
+  --rf-blue-400: 118 142 163;
+  --rf-blue-500: 86 115 143;
+  --rf-blue-600: 61 95 128;
+  --rf-blue-700: 54 83 109;
+  --rf-blue-800: 47 72 92;
+  --rf-blue-900: 40 61 74;
+  --rf-blue-950: 33 49 56;
+  --rf-sky-50: 236 238 237;
+  --rf-sky-100: 221 225 227;
+  --rf-sky-200: 190 200 208;
+  --rf-sky-300: 156 172 187;
+  --rf-sky-400: 118 142 163;
+  --rf-sky-500: 86 115 143;
+  --rf-sky-600: 61 95 128;
+  --rf-sky-700: 54 83 109;
+  --rf-sky-800: 47 72 92;
+  --rf-sky-900: 40 61 74;
+  --rf-sky-950: 33 49 56;
+  --rf-indigo-50: 239 236 237;
+  --rf-indigo-100: 228 223 228;
+  --rf-indigo-200: 205 195 210;
+  --rf-indigo-300: 178 164 190;
+  --rf-indigo-400: 150 130 168;
+  --rf-indigo-500: 125 101 149;
+  --rf-indigo-600: 106 79 134;
+  --rf-indigo-700: 91 70 114;
+  --rf-indigo-800: 76 62 96;
+  --rf-indigo-900: 62 53 77;
+  --rf-indigo-950: 47 44 58;
+  --rf-violet-50: 239 236 237;
+  --rf-violet-100: 228 223 228;
+  --rf-violet-200: 205 195 210;
+  --rf-violet-300: 178 164 190;
+  --rf-violet-400: 150 130 168;
+  --rf-violet-500: 125 101 149;
+  --rf-violet-600: 106 79 134;
+  --rf-violet-700: 91 70 114;
+  --rf-violet-800: 76 62 96;
+  --rf-violet-900: 62 53 77;
+  --rf-violet-950: 47 44 58;
+  --rf-purple-50: 239 236 237;
+  --rf-purple-100: 228 223 228;
+  --rf-purple-200: 205 195 210;
+  --rf-purple-300: 178 164 190;
+  --rf-purple-400: 150 130 168;
+  --rf-purple-500: 125 101 149;
+  --rf-purple-600: 106 79 134;
+  --rf-purple-700: 91 70 114;
+  --rf-purple-800: 76 62 96;
+  --rf-purple-900: 62 53 77;
+  --rf-purple-950: 47 44 58;
+}
+
+.dark, .a4-preview, [data-rf-export-root], [data-rf-export-root] * {
+  --rf-blue-50: 239 246 255;
+  --rf-blue-100: 219 234 254;
+  --rf-blue-200: 191 219 254;
+  --rf-blue-300: 147 197 253;
+  --rf-blue-400: 96 165 250;
+  --rf-blue-500: 59 130 246;
+  --rf-blue-600: 37 99 235;
+  --rf-blue-700: 29 78 216;
+  --rf-blue-800: 30 64 175;
+  --rf-blue-900: 30 58 138;
+  --rf-blue-950: 23 37 84;
+  --rf-sky-50: 240 249 255;
+  --rf-sky-100: 224 242 254;
+  --rf-sky-200: 186 230 253;
+  --rf-sky-300: 125 211 252;
+  --rf-sky-400: 56 189 248;
+  --rf-sky-500: 14 165 233;
+  --rf-sky-600: 2 132 199;
+  --rf-sky-700: 3 105 161;
+  --rf-sky-800: 7 89 133;
+  --rf-sky-900: 12 74 110;
+  --rf-sky-950: 8 47 73;
+  --rf-indigo-50: 238 242 255;
+  --rf-indigo-100: 224 231 255;
+  --rf-indigo-200: 199 210 254;
+  --rf-indigo-300: 165 180 252;
+  --rf-indigo-400: 129 140 248;
+  --rf-indigo-500: 99 102 241;
+  --rf-indigo-600: 79 70 229;
+  --rf-indigo-700: 67 56 202;
+  --rf-indigo-800: 55 48 163;
+  --rf-indigo-900: 49 46 129;
+  --rf-indigo-950: 30 27 75;
+  --rf-violet-50: 245 243 255;
+  --rf-violet-100: 237 233 254;
+  --rf-violet-200: 221 214 254;
+  --rf-violet-300: 196 181 253;
+  --rf-violet-400: 167 139 250;
+  --rf-violet-500: 139 92 246;
+  --rf-violet-600: 124 58 237;
+  --rf-violet-700: 109 40 217;
+  --rf-violet-800: 91 33 182;
+  --rf-violet-900: 76 29 149;
+  --rf-violet-950: 46 16 101;
+  --rf-purple-50: 250 245 255;
+  --rf-purple-100: 243 232 255;
+  --rf-purple-200: 233 213 255;
+  --rf-purple-300: 216 180 254;
+  --rf-purple-400: 192 132 252;
+  --rf-purple-500: 168 85 247;
+  --rf-purple-600: 147 51 234;
+  --rf-purple-700: 126 34 206;
+  --rf-purple-800: 107 33 168;
+  --rf-purple-900: 88 28 135;
+  --rf-purple-950: 59 7 100;
 }
 
 :root {

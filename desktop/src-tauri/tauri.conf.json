@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "榫卯简历",
+  "mainBinaryName": "sunmao-resume",
+  "version": "0.1.0",
+  "identifier": "lab.banshou.sunmao",
+  "build": {
+    "frontendDist": "../../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": false,
+    "publisher": "万象更新技术实验室",
+    "copyright": "ResumeFLOW © CMFHF；本地版修改 © 2026 万象更新技术实验室；AGPL-3.0-or-later",
+    "shortDescription": "榫卯简历 · ResumeFLOW 本地版",
+    "icon": ["icons/icon.ico", "icons/128x128.png"]
+  }
+}

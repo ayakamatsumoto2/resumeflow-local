@@ -1,0 +1,71 @@
+name: 打包榫卯简历（Windows）
+
+# 推送到 main 时自动打包出 sunmao-resume.exe（在这次运行的 Artifacts 里下载）。
+# 打 v 开头的标签（如 v0.1.0）时，同时发布到 Releases：
+#   - sunmao-resume.exe：单独使用的程序（需要系统已装 WebView2，Win10/11 一般自带）
+#   - 万象之匣打包时会从 Releases 取这个文件，作为附带程序装进安装包
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['backend/**', 'docs/**', '**/*.md', 'tests/**', 'android/**']
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+
+      - name: 安装网页依赖
+        run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: 构建网页
+        run: npm run build
+
+      - name: 安装桌面外壳依赖
+        working-directory: desktop
+        run: npm ci
+      - name: 单元测试
+        working-directory: desktop/src-tauri
+        run: cargo test
+      - name: 打包 exe
+        working-directory: desktop
+        run: npx tauri build --no-bundle
+
+      - name: 整理产物
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out | Out-Null
+          Copy-Item desktop/src-tauri/target/release/sunmao-resume.exe out/sunmao-resume.exe
+          Copy-Item LICENSE out/LICENSE.txt
+          Get-ChildItem out | Format-Table Name, Length
+      - name: 上传
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunmao-resume-windows
+          path: out/*
+          if-no-files-found: error
+      - name: 发布到 Releases
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            out/sunmao-resume.exe
+            out/LICENSE.txt

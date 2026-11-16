@@ -732,10 +732,10 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity cursor-pointer">
             <img
               src="/logo-mark-128.png"
-              alt="原子简历 favicon"
+              alt="榫卯简历 favicon"
               className="h-8 w-8 object-contain"
             />
-            <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white md:text-xl">原子简历</span>
+            <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white md:text-xl">榫卯简历</span>
           </div>
           <div className="hidden h-6 w-px bg-border-light dark:bg-border-dark md:block"></div>
           <div className="flex items-center gap-2">
@@ -754,7 +754,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           {/* 推广卡片：当没有简历时显示 */}
           {resumes.length === 0 && (
             isAuthenticated ? (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-dashed border-blue-200 dark:border-blue-800 p-6 shadow-sm">
+              <div className="bg-gradient-to-r from-emerald-50 to-slate-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl border border-dashed border-emerald-200 dark:border-blue-800 p-6 shadow-sm">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
@@ -763,7 +763,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </h3>
                     <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                       <p>
-                        暂无经历数据，导入您的简历可快速构建经历库，让原子简历为您智能分析和优化。
+                        暂无经历数据，导入您的简历可快速构建经历库，让榫卯简历为您智能分析和优化。
                       </p>
                       <p className="flex items-start gap-2 text-gray-500 dark:text-gray-300">
                         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />

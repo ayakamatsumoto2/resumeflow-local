@@ -5,10 +5,23 @@
  * 其他请求（例如直连 DeepSeek 等模型接口）不受影响。
  */
 import { HttpError, matchRoute, type LocalResult, type StreamEvent } from './http';
-import { ready } from './store';
+import { ready as storeReady } from './store';
+import { refreshBanshoSettings } from './ai/settings';
 import './handlers';
 
 const API_MOUNT = '/api';
+
+let readyPromise: Promise<void> | null = null;
+/** 本地数据就绪，并读过一次万象之匣的全局设置（桌面版）。 */
+const ready = (): Promise<void> => {
+  if (!readyPromise) {
+    readyPromise = (async () => {
+      await storeReady();
+      await refreshBanshoSettings();
+    })();
+  }
+  return readyPromise;
+};
 
 const jsonResponse = (status: number, payload: unknown) => new Response(
   JSON.stringify(payload),

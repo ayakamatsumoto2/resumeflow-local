@@ -6,11 +6,15 @@ import React from 'react';
 import { Download, Eye, EyeOff, Upload, X } from 'lucide-react';
 import { chat } from './ai/llm';
 import {
-  AI_PROVIDER_PRESETS, DEFAULT_AI_SETTINGS, readAiSettings, writeAiSettings, type AiSettings,
+  AI_PROVIDER_PRESETS, DEFAULT_AI_SETTINGS, readAiSource, readLocalAiSettings, refreshBanshoSettings,
+  writeAiSettings, writeAiSource, type AiSettings, type AiSettingsSource, type BanshoAiProfile,
 } from './ai/settings';
 import { clearAllData, exportBackup, importBackup, ready } from './store';
 
-export const LOCAL_EDITION_SOURCE_URL = 'https://github.com/CMFHF-404/ResumeFLOW';
+/** 本地版（修改后）的源码仓库：AGPL 要求向用户提供源码获取方式。 */
+export const LOCAL_EDITION_SOURCE_URL = 'https://github.com/ayakamatsumoto2/resumeflow-local';
+/** 原项目 */
+export const UPSTREAM_SOURCE_URL = 'https://github.com/CMFHF-404/ResumeFLOW';
 
 interface LocalSettingsModalProps {
   isOpen: boolean;
@@ -45,15 +49,20 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
   const [busy, setBusy] = React.useState<'' | 'save' | 'test' | 'export' | 'import' | 'clear'>('');
   const [notice, setNotice] = React.useState<Notice>(null);
   const [includeKey, setIncludeKey] = React.useState(false);
+  const [bansho, setBansho] = React.useState<BanshoAiProfile | null>(null);
+  const [source, setSource] = React.useState<AiSettingsSource>('bansho');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (!isOpen) return undefined;
     let cancelled = false;
-    void ready().then(() => {
+    void ready().then(async () => {
+      const profile = await refreshBanshoSettings();
       if (cancelled) return;
-      setForm(readAiSettings());
+      setBansho(profile);
+      setSource(readAiSource());
+      setForm(readLocalAiSettings());
       setLoaded(true);
     });
     const focusTarget = returnFocusElement
@@ -93,11 +102,23 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
     }
   };
 
+  const usingBansho = !!bansho && source === 'bansho';
+
+  const handleSourceChange = async (next: AiSettingsSource) => {
+    setSource(next);
+    setNotice(null);
+    try {
+      await writeAiSource(next);
+    } catch {
+      setNotice({ tone: 'error', text: '保存失败，请重试。' });
+    }
+  };
+
   const handleTest = async () => {
     setBusy('test');
     setNotice({ tone: 'info', text: '正在测试连接…' });
     try {
-      await writeAiSettings(form);
+      if (!usingBansho) await writeAiSettings(form);
       const { content } = await chat(
         [{ role: 'user', content: '请只回复两个字：正常' }],
         { jsonMode: false },
@@ -200,6 +221,43 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
             <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
               AI 功能会把相关的简历内容直接发给你在这里填写的模型服务，费用由该服务按你的账户计费。
             </p>
+            {bansho ? (
+              <fieldset className="mt-4 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+                <legend className="sr-only">AI 设置来源</legend>
+                <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
+                  <input
+                    type="radio"
+                    name="ai-source"
+                    className="mt-1 text-emerald-700 focus:ring-emerald-600"
+                    checked={source === 'bansho'}
+                    onChange={() => void handleSourceChange('bansho')}
+                  />
+                  <span>
+                    使用万象之匣的全局设置
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">
+                      当前：{bansho.name} · {bansho.model}。要修改请到万象之匣主页右上角的「全局设置」。
+                    </span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
+                  <input
+                    type="radio"
+                    name="ai-source"
+                    className="mt-1 text-emerald-700 focus:ring-emerald-600"
+                    checked={source === 'local'}
+                    onChange={() => void handleSourceChange('local')}
+                  />
+                  <span>在榫卯简历里单独设置</span>
+                </label>
+              </fieldset>
+            ) : null}
+            {usingBansho ? (
+              <div className="mt-4">
+                <button type="button" className={secondaryButton} disabled={!loaded || !!busy} onClick={handleTest}>
+                  {busy === 'test' ? '测试中…' : '测试连接'}
+                </button>
+              </div>
+            ) : (
             <div className="mt-4 space-y-4">
               <label className={labelClass}>
                 服务商
@@ -287,6 +345,7 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
                 </button>
               </div>
             </div>
+            )}
           </section>
 
           <section aria-labelledby="local-settings-data">
@@ -331,8 +390,18 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
           <section aria-labelledby="local-settings-about">
             <h3 id="local-settings-about" className="text-sm font-semibold text-slate-900 dark:text-slate-100">关于</h3>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              ResumeFLOW 本地版，基于 CMFHF 的开源项目 ResumeFLOW 修改，按 AGPL-3.0-or-later 许可发布。
-              你有权获取本程序的完整源代码：
+              榫卯简历（ResumeFLOW 本地版），由万象更新技术实验室基于 CMFHF 的开源项目
+              {' '}
+              <a
+                className="font-medium text-teal-700 underline underline-offset-2 dark:text-teal-300"
+                href={UPSTREAM_SOURCE_URL}
+                target="_blank"
+                rel="noreferrer"
+              >
+                ResumeFLOW
+              </a>
+              {' '}
+              修改，按 GNU AGPL-3.0-or-later 许可发布。你有权获取本程序的完整源代码：
               {' '}
               <a
                 className="font-medium text-teal-700 underline underline-offset-2 dark:text-teal-300"

@@ -27,7 +27,7 @@ const themedScale = (name) => Object.fromEntries(
 module.exports = {
   content: [
     './index.html',
-    './{components,constants,hooks,services,utils,views}/**/*.{ts,tsx}',
+    './{components,constants,hooks,services,utils,views,local}/**/*.{ts,tsx}',
     './App.tsx',
     './index.tsx',
   ],
@@ -41,6 +41,11 @@ module.exports = {
         emerald: themedScale('emerald'),
         teal: themedScale('teal'),
         green: themedScale('green'),
+        blue: themedScale('blue'),
+        sky: themedScale('sky'),
+        indigo: themedScale('indigo'),
+        violet: themedScale('violet'),
+        purple: themedScale('purple'),
         primary: '#2F5C4B',
         'primary-dark': '#264C3E',
         'background-light': '#F6F4EE',

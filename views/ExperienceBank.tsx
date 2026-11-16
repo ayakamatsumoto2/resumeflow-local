@@ -395,10 +395,10 @@ const ExperienceBank: React.FC<ExperienceBankProps> = ({
           <div className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity cursor-pointer">
             <img
               src="/logo-mark-128.png"
-              alt="原子简历 favicon"
+              alt="榫卯简历 favicon"
               className="h-8 w-8 object-contain"
             />
-            <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white md:text-xl">原子简历</span>
+            <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white md:text-xl">榫卯简历</span>
           </div>
           <div className="hidden h-6 w-px bg-border-light dark:bg-border-dark md:block"></div>
           <div className="flex items-center gap-2">

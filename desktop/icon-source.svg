@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- 榫卯简历图标：两块木构件以燕尾榫咬合，配色取自万象之匣 -->
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="#fbfaf6"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="none" stroke="#e7e3d9" stroke-width="12"/>
+  <!-- 下方构件（卯）：带燕尾槽 -->
+  <path d="M232 456 Q232 436 252 436 H380 L340 548 H684 L644 436 H772 Q792 436 792 456 V780 Q792 800 772 800 H252 Q232 800 232 780 Z" fill="#2f5c4b"/>
+  <!-- 上方构件（榫）：燕尾榫头插入槽内 -->
+  <path d="M252 224 H772 Q792 224 792 244 V400 Q792 420 772 420 H632 L672 536 H352 L392 420 H252 Q232 420 232 400 V244 Q232 224 252 224 Z" fill="#cfe2d6"/>
+  <path d="M252 224 H772 Q792 224 792 244 V400 Q792 420 772 420 H632 L672 536 H352 L392 420 H252 Q232 420 232 400 V244 Q232 224 252 224 Z" fill="none" stroke="#2f5c4b" stroke-width="16" stroke-linejoin="round"/>
+  <!-- 简历上的文字行 -->
+  <rect x="300" y="290" width="200" height="26" rx="13" fill="#2f5c4b"/>
+  <rect x="300" y="346" width="420" height="20" rx="10" fill="#3f7a63" opacity=".55"/>
+  <rect x="300" y="612" width="420" height="20" rx="10" fill="#fbfaf6" opacity=".7"/>
+  <rect x="300" y="664" width="300" height="20" rx="10" fill="#fbfaf6" opacity=".5"/>
+  <circle cx="742" cy="736" r="22" fill="#b48a45"/>
+</svg>

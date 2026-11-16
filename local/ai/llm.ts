@@ -83,6 +83,17 @@ const buildRequestBody = (
   return body;
 };
 
+type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
+
+/**
+ * 桌面版（榫卯简历.exe）里用 Tauri 的 HTTP 插件从本机发请求，不受浏览器跨域限制；
+ * 浏览器里直接用 fetch（需要模型服务允许跨域）。
+ */
+const modelFetch = (): FetchLike => {
+  const tauriHttp = (globalThis as { __TAURI__?: { http?: { fetch?: FetchLike } } }).__TAURI__?.http;
+  return typeof tauriHttp?.fetch === 'function' ? tauriHttp.fetch : (input, init) => fetch(input, init);
+};
+
 /** 发起一次流式对话，返回完整正文与思考文本。 */
 export const chat = async (
   messages: ChatMessage[],
@@ -94,7 +105,7 @@ export const chat = async (
   }
   let response: Response;
   try {
-    response = await fetch(`${settings.baseUrl}/chat/completions`, {
+    response = await modelFetch()(`${settings.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

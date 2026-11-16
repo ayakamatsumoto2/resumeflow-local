@@ -1,4 +1,4 @@
-# ResumeFLOW 本地版（resumeflow-local）
+# 榫卯简历 · ResumeFLOW 本地版（resumeflow-local）
 
 纯本地运行的简历工具：简历编辑、多份简历管理、经历库、AI 助手、JD 匹配分析、PDF 导出、数据备份。
 不需要登录，不需要服务器，所有数据只保存在你自己的电脑上；AI 功能使用你自己填写的 DeepSeek（或其他兼容 OpenAI 接口）的 API Key。
@@ -16,6 +16,9 @@ npm run dev      # 开发预览
 npm run build    # 生成 dist/，可直接用任意静态服务器打开
 ```
 
+Windows 桌面版：到 Releases 下载 `sunmao-resume.exe` 直接运行（需要 WebView2，Win10/11 一般自带）；
+也可以自己构建：先 `npm run build`，再在 `desktop/` 里 `npm ci && npx tauri build --no-bundle`。
+
 首次使用：点左上角头像 →「本地设置」→ 填写 API Key（默认 DeepSeek：`https://api.deepseek.com`，模型 `deepseek-chat`，深度思考 `deepseek-reasoner`）→「保存并测试连接」。
 
 ## 与原版的区别（修改声明）
@@ -32,7 +35,9 @@ npm run build    # 生成 dist/，可直接用任意静态服务器打开
 | PDF 导出 | 服务端 Playwright + Chromium | 系统打印对话框「另存为 PDF」（`local/printExport.ts`） |
 | 支付 / 额度 / 反馈 / 统计 / Agent API | 有 | 移除 |
 | 数据备份 | — | 新增 JSON 备份导出 / 导入（本地设置） |
-| 界面 | 原配色 | 换成万象之匣配色与字体（`local/bansho-theme.css`）；简历预览与 PDF 保持原样 |
+| 界面 | 原配色、名称「原子简历」 | 名称改为「榫卯简历」；换成万象之匣配色（`local/bansho-theme.css`）；简历预览与 PDF 保持原样 |
+| 字体 | 附带 Arial、思源黑体字体文件 | 不再附带，使用系统字体 |
+| 桌面版 | — | `desktop/`（Tauri 2）打包成 `sunmao-resume.exe`；可读取万象之匣的全局 AI 设置（`%APPDATA%\lab.banshou.hako\settings.json`） |
 
 暂未移植：「六维深度评估」（原版依赖服务端多轮校验流程）。
 

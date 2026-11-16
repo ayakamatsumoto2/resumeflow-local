@@ -29,10 +29,10 @@ const GuestResumeEditorPreview: React.FC<GuestResumeEditorPreviewProps> = ({ onR
                         <div className="flex items-center gap-2 text-primary">
                             <img
                                 src="/logo-mark-128.png"
-                                alt="原子简历 favicon"
+                                alt="榫卯简历 favicon"
                                 className="h-8 w-8 object-contain"
                             />
-                            <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white md:text-xl">原子简历</span>
+                            <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white md:text-xl">榫卯简历</span>
                         </div>
                         <div className="hidden h-6 w-px bg-border-light dark:bg-border-dark md:block" />
                         <span className="text-sm font-medium text-gray-500">简历工厂</span>
