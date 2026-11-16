@@ -9,6 +9,7 @@
 use std::path::PathBuf;
 
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_dialog::DialogExt;
 
 const MAIN_WINDOW: &str = "main";
 
@@ -29,6 +30,32 @@ fn read_bansho_settings() -> Option<String> {
     // 只接受合法 JSON，坏文件当作不存在。
     serde_json::from_str::<serde_json::Value>(&text).ok()?;
     Some(text)
+}
+
+/// 弹出「另存为」窗口保存文本文件（用于导出备份）。用户取消时返回 None。
+#[tauri::command]
+async fn save_text_file(app: AppHandle, suggested_name: String, content: String) -> Result<Option<String>, String> {
+    let name = sanitize_file_name(&suggested_name);
+    let mut dialog = app.dialog().file().set_file_name(&name).add_filter("备份文件 (JSON)", &["json"]);
+    if let Ok(docs) = app.path().document_dir() {
+        dialog = dialog.set_directory(docs);
+    }
+    let Some(picked) = dialog.blocking_save_file() else {
+        return Ok(None);
+    };
+    let path = picked.into_path().map_err(|e| e.to_string())?;
+    std::fs::write(&path, content).map_err(|e| format!("保存失败：{e}"))?;
+    Ok(Some(path.to_string_lossy().to_string()))
+}
+
+/// 去掉文件名里 Windows 不允许的字符。
+fn sanitize_file_name(name: &str) -> String {
+    let cleaned: String = name
+        .chars()
+        .map(|c| if "\\/:*?\"<>|".contains(c) || c.is_control() { '_' } else { c })
+        .collect();
+    let trimmed = cleaned.trim().trim_matches('.');
+    if trimmed.is_empty() { "backup.json".into() } else { trimmed.into() }
 }
 
 /// 告诉网页这是桌面版。
@@ -70,7 +97,8 @@ pub fn run() {
         // 模型请求从 Rust 发出，不受浏览器跨域限制。
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![read_bansho_settings, desktop_info])
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![read_bansho_settings, desktop_info, save_text_file])
         .setup(|app| {
             show_main(app.handle())?;
             Ok(())
@@ -82,6 +110,13 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sanitizes_file_names() {
+        assert_eq!(sanitize_file_name("榫卯简历备份-2026-11-16.json"), "榫卯简历备份-2026-11-16.json");
+        assert_eq!(sanitize_file_name("a/b:c?.json"), "a_b_c_.json");
+        assert_eq!(sanitize_file_name("  "), "backup.json");
+    }
 
     #[test]
     fn settings_path_points_to_bansho_config_dir() {

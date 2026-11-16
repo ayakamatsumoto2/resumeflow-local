@@ -9,7 +9,9 @@ import {
   AI_PROVIDER_PRESETS, DEFAULT_AI_SETTINGS, readAiSource, readLocalAiSettings, refreshBanshoSettings,
   writeAiSettings, writeAiSource, type AiSettings, type AiSettingsSource, type BanshoAiProfile,
 } from './ai/settings';
-import { clearAllData, exportBackup, importBackup, ready } from './store';
+import {
+  BACKUP_PARTS, clearAllData, describeBackup, exportBackup, importBackup, ready, type BackupPart,
+} from './store';
 
 /** 本地版（修改后）的源码仓库：AGPL 要求向用户提供源码获取方式。 */
 export const LOCAL_EDITION_SOURCE_URL = 'https://github.com/ayakamatsumoto2/resumeflow-local';
@@ -30,8 +32,30 @@ const labelClass = 'block text-sm font-medium text-slate-700 dark:text-slate-200
 const secondaryButton = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800';
 const primaryButton = 'inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60';
 
-const downloadJson = (fileName: string, payload: unknown) => {
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+type TauriInvoke = (cmd: string, args?: unknown) => Promise<unknown>;
+const tauriInvoke = (): TauriInvoke | null => {
+  const invoke = (globalThis as { __TAURI__?: { core?: { invoke?: TauriInvoke } } }).__TAURI__?.core?.invoke;
+  return typeof invoke === 'function' ? invoke : null;
+};
+
+/**
+ * 保存备份：桌面版弹出 Windows「另存为」窗口，由用户选位置；
+ * 浏览器里按普通下载处理（进入「下载」文件夹）。
+ * 返回保存位置；用户取消时返回 null。
+ */
+const saveJson = async (fileName: string, payload: unknown): Promise<string | null> => {
+  const text = JSON.stringify(payload, null, 2);
+  const invoke = tauriInvoke();
+  if (invoke) {
+    const saved = await invoke('save_text_file', { suggestedName: fileName, content: text });
+    return typeof saved === 'string' && saved ? saved : null;
+  }
+  downloadJson(fileName, text);
+  return '浏览器的「下载」文件夹';
+};
+
+const downloadJson = (fileName: string, text: string) => {
+  const blob = new Blob([text], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -49,6 +73,7 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
   const [busy, setBusy] = React.useState<'' | 'save' | 'test' | 'export' | 'import' | 'clear'>('');
   const [notice, setNotice] = React.useState<Notice>(null);
   const [includeKey, setIncludeKey] = React.useState(false);
+  const [parts, setParts] = React.useState<Set<BackupPart>>(() => new Set(BACKUP_PARTS.map((part) => part.id)));
   const [bansho, setBansho] = React.useState<BanshoAiProfile | null>(null);
   const [source, setSource] = React.useState<AiSettingsSource>('bansho');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -138,12 +163,17 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
   const handleExport = async () => {
     setBusy('export');
     try {
-      const backup = await exportBackup({ includeApiKey: includeKey });
+      if (!parts.size) {
+        setNotice({ tone: 'error', text: '请至少选择一项要导出的内容。' });
+        return;
+      }
+      const backup = await exportBackup({ includeApiKey: includeKey && parts.has('settings'), parts: [...parts] });
       const stamp = new Date().toISOString().slice(0, 10);
-      downloadJson(`resumeflow-backup-${stamp}.json`, backup);
-      setNotice({ tone: 'ok', text: '备份文件已导出。' });
-    } catch {
-      setNotice({ tone: 'error', text: '导出失败，请重试。' });
+      const where = await saveJson(`榫卯简历备份-${stamp}.json`, backup);
+      if (where) setNotice({ tone: 'ok', text: `备份已保存到：${where}` });
+      else setNotice({ tone: 'info', text: '已取消导出。' });
+    } catch (error) {
+      setNotice({ tone: 'error', text: `导出失败：${error instanceof Error ? error.message : String(error)}` });
     } finally {
       setBusy('');
     }
@@ -153,10 +183,17 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-    if (!window.confirm('导入备份会覆盖当前本机的全部简历、经历库和对话记录，确定继续吗？')) return;
     setBusy('import');
     try {
-      await importBackup(JSON.parse(await file.text()));
+      const payload = JSON.parse(await file.text());
+      const info = describeBackup(payload);
+      const names = BACKUP_PARTS.filter((part) => info.parts.includes(part.id)).map((part) => part.label);
+      const date = info.exportedAt ? `（${info.exportedAt.slice(0, 10)} 导出）` : '';
+      if (!window.confirm(`这个备份${date}包含：${names.join('、')}。\n\n导入后，本机的这几项会被备份里的内容替换，其他数据不变。确定继续吗？`)) {
+        setBusy('');
+        return;
+      }
+      await importBackup(payload);
       setNotice({ tone: 'ok', text: '导入成功，正在刷新…' });
       window.setTimeout(() => window.location.reload(), 600);
     } catch (error) {
@@ -351,16 +388,38 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
           <section aria-labelledby="local-settings-data">
             <h3 id="local-settings-data" className="text-sm font-semibold text-slate-900 dark:text-slate-100">数据备份</h3>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              导出的备份包含个人资料、经历库、简历、技能证书和 AI 对话记录，可在另一台电脑上导入。
+              可以选择导出哪些内容。导入时只替换备份里包含的那几项，其他数据保持不变。
             </p>
-            <label className="mt-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <fieldset className="mt-3 grid gap-x-4 gap-y-2 rounded-xl border border-slate-200 p-3 sm:grid-cols-2 dark:border-slate-700">
+              <legend className="px-1 text-xs text-slate-500 dark:text-slate-400">导出哪些内容</legend>
+              {BACKUP_PARTS.map((part) => (
+                <label key={part.id} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
+                    checked={parts.has(part.id)}
+                    onChange={(event) => {
+                      const next = new Set(parts);
+                      if (event.target.checked) next.add(part.id); else next.delete(part.id);
+                      setParts(next);
+                    }}
+                  />
+                  <span>
+                    {part.label}
+                    {part.hint ? <span className="block text-xs text-slate-500 dark:text-slate-400">{part.hint}</span> : null}
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+            <label className="mt-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
               <input
                 type="checkbox"
                 className="rounded border-slate-300 text-teal-700 focus:ring-teal-600"
-                checked={includeKey}
+                checked={includeKey && parts.has('settings')}
+                disabled={!parts.has('settings')}
                 onChange={(event) => setIncludeKey(event.target.checked)}
               />
-              备份里包含 API Key（文件请自行妥善保管）
+              设置里连同 API Key 一起导出（文件请自行妥善保管）
             </label>
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" className={secondaryButton} disabled={!!busy} onClick={handleExport}>
