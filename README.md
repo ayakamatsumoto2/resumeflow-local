@@ -34,7 +34,7 @@ Windows 桌面版：到 Releases 下载 `sunmao-resume.exe` 直接运行（需�
 | 简历导入 | 服务端解析 PDF / Word / 图片 | 本机提取 PDF / Word / 文本的文字后交给模型；暂不支持图片 |
 | PDF 导出 | 服务端 Playwright + Chromium | 系统打印对话框「另存为 PDF」（`local/printExport.ts`） |
 | 支付 / 额度 / 反馈 / 统计 / Agent API | 有 | 移除 |
-| 数据备份 | — | 新增 JSON 备份导出 / 导入（本地设置） |
+| 数据备份 | — | 新增 JSON 备份：按条目挑选导出；导入时挑选条目并合并（另存一份 / 覆盖），不整体覆盖 |
 | 界面 | 原配色、名称「原子简历」 | 名称改为「榫卯简历」；换成万象之匣配色（`local/bansho-theme.css`）；简历预览与 PDF 保持原样 |
 | 字体 | 附带 Arial、思源黑体字体文件 | 不再附带，使用系统字体 |
 | 桌面版 | — | `desktop/`（Tauri 2）打包成 `sunmao-resume.exe`；可读取万象之匣的全局 AI 设置（`%APPDATA%\lab.banshou.hako\settings.json`） |

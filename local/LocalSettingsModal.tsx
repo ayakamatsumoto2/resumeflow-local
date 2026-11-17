@@ -9,9 +9,9 @@ import {
   AI_PROVIDER_PRESETS, DEFAULT_AI_SETTINGS, readAiSource, readLocalAiSettings, refreshBanshoSettings,
   writeAiSettings, writeAiSource, type AiSettings, type AiSettingsSource, type BanshoAiProfile,
 } from './ai/settings';
-import {
-  BACKUP_PARTS, clearAllData, describeBackup, exportBackup, importBackup, ready, type BackupPart,
-} from './store';
+import { clearAllData, ready } from './store';
+import { inspectBackup, type BackupManifest } from './backup';
+import BackupDialog from './BackupDialog';
 
 /** 本地版（修改后）的源码仓库：AGPL 要求向用户提供源码获取方式。 */
 export const LOCAL_EDITION_SOURCE_URL = 'https://github.com/ayakamatsumoto2/resumeflow-local';
@@ -72,8 +72,9 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
   const [showKey, setShowKey] = React.useState(false);
   const [busy, setBusy] = React.useState<'' | 'save' | 'test' | 'export' | 'import' | 'clear'>('');
   const [notice, setNotice] = React.useState<Notice>(null);
-  const [includeKey, setIncludeKey] = React.useState(false);
-  const [parts, setParts] = React.useState<Set<BackupPart>>(() => new Set(BACKUP_PARTS.map((part) => part.id)));
+  const [backupDialog, setBackupDialog] = React.useState<
+    null | { mode: 'export' } | { mode: 'import'; payload: unknown; manifest: BackupManifest; fileName: string }
+  >(null);
   const [bansho, setBansho] = React.useState<BanshoAiProfile | null>(null);
   const [source, setSource] = React.useState<AiSettingsSource>('bansho');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -160,23 +161,12 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
     }
   };
 
-  const handleExport = async () => {
-    setBusy('export');
-    try {
-      if (!parts.size) {
-        setNotice({ tone: 'error', text: '请至少选择一项要导出的内容。' });
-        return;
-      }
-      const backup = await exportBackup({ includeApiKey: includeKey && parts.has('settings'), parts: [...parts] });
-      const stamp = new Date().toISOString().slice(0, 10);
-      const where = await saveJson(`榫卯简历备份-${stamp}.json`, backup);
-      if (where) setNotice({ tone: 'ok', text: `备份已保存到：${where}` });
-      else setNotice({ tone: 'info', text: '已取消导出。' });
-    } catch (error) {
-      setNotice({ tone: 'error', text: `导出失败：${error instanceof Error ? error.message : String(error)}` });
-    } finally {
-      setBusy('');
-    }
+  const handleExport = async (backup: Record<string, unknown>) => {
+    const stamp = new Date().toISOString().slice(0, 10);
+    const where = await saveJson(`榫卯简历备份-${stamp}.json`, backup);
+    setBackupDialog(null);
+    if (where) setNotice({ tone: 'ok', text: `备份已保存到：${where}` });
+    else setNotice({ tone: 'info', text: '已取消导出。' });
   };
 
   const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,23 +176,28 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
     setBusy('import');
     try {
       const payload = JSON.parse(await file.text());
-      const info = describeBackup(payload);
-      const names = BACKUP_PARTS.filter((part) => info.parts.includes(part.id)).map((part) => part.label);
-      const date = info.exportedAt ? `（${info.exportedAt.slice(0, 10)} 导出）` : '';
-      if (!window.confirm(`这个备份${date}包含：${names.join('、')}。\n\n导入后，本机的这几项会被备份里的内容替换，其他数据不变。确定继续吗？`)) {
-        setBusy('');
-        return;
-      }
-      await importBackup(payload);
-      setNotice({ tone: 'ok', text: '导入成功，正在刷新…' });
-      window.setTimeout(() => window.location.reload(), 600);
+      const manifest = await inspectBackup(payload);
+      setBackupDialog({ mode: 'import', payload, manifest, fileName: file.name });
     } catch (error) {
       setNotice({
         tone: 'error',
-        text: error instanceof SyntaxError ? '备份文件不是有效的 JSON。' : error instanceof Error ? error.message : '导入失败。',
+        text: error instanceof SyntaxError ? '备份文件不是有效的 JSON。' : error instanceof Error ? error.message : '读取备份失败。',
       });
+    } finally {
       setBusy('');
     }
+  };
+
+  const handleImported = (result: { added: number; copied: number; overwritten: number; autoAdded: number }) => {
+    setBackupDialog(null);
+    const parts = [
+      result.added ? `新增 ${result.added} 项` : '',
+      result.copied ? `另存 ${result.copied} 份` : '',
+      result.overwritten ? `覆盖 ${result.overwritten} 项` : '',
+      result.autoAdded ? `随简历补上 ${result.autoAdded} 项` : '',
+    ].filter(Boolean);
+    setNotice({ tone: 'ok', text: `导入完成：${parts.join('，') || '没有需要导入的新内容'}。正在刷新…` });
+    window.setTimeout(() => window.location.reload(), 900);
   };
 
   const handleClear = async () => {
@@ -388,41 +383,10 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
           <section aria-labelledby="local-settings-data">
             <h3 id="local-settings-data" className="text-sm font-semibold text-slate-900 dark:text-slate-100">数据备份</h3>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              可以选择导出哪些内容。导入时只替换备份里包含的那几项，其他数据保持不变。
+              导出时可以挑选具体哪几份简历、哪些经历和对话；导入时先列出备份里的内容，勾选要导入的，本机已有的可以另存一份或覆盖，原有数据都会保留。
             </p>
-            <fieldset className="mt-3 grid gap-x-4 gap-y-2 rounded-xl border border-slate-200 p-3 sm:grid-cols-2 dark:border-slate-700">
-              <legend className="px-1 text-xs text-slate-500 dark:text-slate-400">导出哪些内容</legend>
-              {BACKUP_PARTS.map((part) => (
-                <label key={part.id} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
-                    checked={parts.has(part.id)}
-                    onChange={(event) => {
-                      const next = new Set(parts);
-                      if (event.target.checked) next.add(part.id); else next.delete(part.id);
-                      setParts(next);
-                    }}
-                  />
-                  <span>
-                    {part.label}
-                    {part.hint ? <span className="block text-xs text-slate-500 dark:text-slate-400">{part.hint}</span> : null}
-                  </span>
-                </label>
-              ))}
-            </fieldset>
-            <label className="mt-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-              <input
-                type="checkbox"
-                className="rounded border-slate-300 text-teal-700 focus:ring-teal-600"
-                checked={includeKey && parts.has('settings')}
-                disabled={!parts.has('settings')}
-                onChange={(event) => setIncludeKey(event.target.checked)}
-              />
-              设置里连同 API Key 一起导出（文件请自行妥善保管）
-            </label>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" className={secondaryButton} disabled={!!busy} onClick={handleExport}>
+              <button type="button" className={secondaryButton} disabled={!!busy} onClick={() => setBackupDialog({ mode: 'export' })}>
                 <Download className="h-4 w-4" />导出备份
               </button>
               <button type="button" className={secondaryButton} disabled={!!busy} onClick={() => fileInputRef.current?.click()}>
@@ -474,6 +438,19 @@ const LocalSettingsModal: React.FC<LocalSettingsModalProps> = ({ isOpen, onClose
           </section>
         </div>
 
+        {backupDialog?.mode === 'export' ? (
+          <BackupDialog mode="export" onClose={() => setBackupDialog(null)} onExport={handleExport} />
+        ) : null}
+        {backupDialog?.mode === 'import' ? (
+          <BackupDialog
+            mode="import"
+            payload={backupDialog.payload}
+            manifest={backupDialog.manifest}
+            fileName={backupDialog.fileName}
+            onClose={() => setBackupDialog(null)}
+            onImported={handleImported}
+          />
+        ) : null}
         {notice ? (
           <div className={`mx-6 mb-5 rounded-lg border px-3 py-2 text-sm ${noticeClass}`} role="status">
             {notice.text}
