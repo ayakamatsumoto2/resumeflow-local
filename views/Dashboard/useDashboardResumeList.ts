@@ -126,6 +126,9 @@ export const useDashboardResumeList = ({
   const [isRenamingResume, setIsRenamingResume] = useState(false);
   const onResumesUpdateRef = useRef(onResumesUpdate);
   const lastSyncedResumesRef = useRef<Resume[] | null>(null);
+  // 本地版：发给外层缓存的每一份列表都记下来。外层把它原样传回来时只是回声，
+  // 不能再拿来覆盖本页列表，否则读数据很快时两边会来回覆盖（0 份 / 1 份闪烁）。
+  const publishedResumesRef = useRef<WeakSet<Resume[]>>(new WeakSet());
   const lastLoadKeyRef = useRef<string | null>(null);
   const loadRequestGenerationRef = useRef(0);
   const createRequestGenerationRef = useRef(0);
@@ -196,6 +199,9 @@ export const useDashboardResumeList = ({
     if (!isCacheOwnerMatched) {
       return;
     }
+    if (publishedResumesRef.current.has(cachedResumes)) {
+      return;
+    }
     if (cachedResumes.length === 0) {
       setResumesOwnerKey(authUserKey);
       setResumes((prev) => (prev.length === 0 ? prev : []));
@@ -215,6 +221,7 @@ export const useDashboardResumeList = ({
       return;
     }
     lastSyncedResumesRef.current = visibleResumes;
+    publishedResumesRef.current.add(visibleResumes);
     handler(visibleResumes);
   }, [visibleResumes]);
 
