@@ -10,16 +10,24 @@
 
 ## 使用
 
+### Windows 桌面版（推荐）
+到 [Releases](https://github.com/ayakamatsumoto2/resumeflow-local/releases) 下载 `sunmao-resume.exe`，双击即可运行，不需要安装（需要 WebView2，Windows 10/11 一般自带）。
+
+> 首次运行如果出现「Windows 已保护你的电脑 / Windows によって PC が保護されました」：程序目前没有代码签名，Windows 不认识它。点「更多信息 / 詳細情報」→「仍要运行 / 実行」即可，之后不会再提示。也可以先右键 exe →「属性」→ 勾选「解除锁定」。
+
+也可以自己构建：先 `npm install && npm run build`，再在 `desktop/` 里 `npm ci && npx tauri build --no-bundle`。
+
+### 网页开发版
+
 ```bash
 npm install
 npm run dev      # 开发预览
 npm run build    # 生成 dist/，可直接用任意静态服务器打开
 ```
 
-Windows 桌面版：到 Releases 下载 `sunmao-resume.exe` 直接运行（需要 WebView2，Win10/11 一般自带）；
-也可以自己构建：先 `npm run build`，再在 `desktop/` 里 `npm ci && npx tauri build --no-bundle`。
+### 首次使用
+点左上角头像 →「本地设置」→ 填写 API Key（默认 DeepSeek：`https://api.deepseek.com`，模型 `deepseek-chat`，深度思考 `deepseek-reasoner`）→「保存并测试连接」。也可以在同一处做数据备份（按条目挑选导出 / 导入合并）。
 
-首次使用：点左上角头像 →「本地设置」→ 填写 API Key（默认 DeepSeek：`https://api.deepseek.com`，模型 `deepseek-chat`，深度思考 `deepseek-reasoner`）→「保存并测试连接」。
 
 ## 与原版的区别（修改声明）
 
